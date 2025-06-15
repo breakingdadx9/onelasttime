@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Anonymous Chat</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; margin-bottom: 10px; padding: 10px; }
+    #msg { width: 80%; }
+  </style>
+</head>
+<body>
+  <h2>💬 Anonymous Chat</h2>
+  <div id="messages"></div>
+  <input id="msg" type="text" placeholder="Type a message...">
+  <button onclick="sendMessage()">Send</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const messages = document.getElementById('messages');
+
+    socket.on('load old messages', msgs => {
+      msgs.forEach(msg => addMessage(msg.text, msg.time));
+    });
+
+    socket.on('message', msg => addMessage(msg.text, msg.time));
+
+    function sendMessage() {
+      const input = document.getElementById('msg');
+      if (input.value.trim()) {
+        socket.emit('new message', input.value);
+        input.value = '';
+      }
+    }
+
+    function addMessage(text, time) {
+      const div = document.createElement('div');
+      div.innerHTML = `<b>${time}:</b> ${text}`;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
+</body>
+</html>
